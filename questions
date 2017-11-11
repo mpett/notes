@@ -1,3 +1,16 @@
+So from last meeting (Nov 10 17):
+I'm not supposed to use the 'vectors' database for this task, they are used for another project and we do not really know what they represent.
+
+I'm supposed to produce vectors in a certain band from the dos.json files in all the materials folder.
+
+It is supposed to be something like this:
+
+1. Parse all the dos.json files and store them as arrays/vectors, ignore the magnetic ones (they have a different name and file structure).
+2. Create a hash map/matrix where all we can get the cosine distance from any material to any other material.
+3. Do 2 for normalized data and unnormalized data.
+4. Pick out top 5 or the top 10 materials with the minimum distance and display them on each material page in OMDB.
+5. The distance could be calculated as either the cosine distance or as the Euclidean distance.
+
 1. What is COD?
 Ok, sry, so COD is the id from the Crystallographic Open Database.
 
