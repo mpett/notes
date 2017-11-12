@@ -1,3 +1,8 @@
+First parse result for 533 materials:
+43 could not be parsed.
+Parse time: 2381 ms
+Number of materials in hash map: 490
+
 Observation: After I have parsed a subset of all materials, I see that the energy vectors are of length 2000, 2400 or 3000.
 How is this adressed? Should we use interpolation if the lengths are different?
 
