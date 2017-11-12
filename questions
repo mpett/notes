@@ -1,3 +1,6 @@
+Observation: After I have parsed a subset of all materials, I see that the energy vectors are of length 2000, 2400 or 3000.
+How is this adressed? Should we use interpolation if the lengths are different?
+
 So from last meeting (Nov 10 17):
 I'm not supposed to use the 'vectors' database for this task, they are used for another project and we do not really know what they represent.
 
