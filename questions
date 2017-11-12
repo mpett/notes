@@ -1,3 +1,8 @@
+For interpolation I need the dos (x-values) to be ordered and to be strictly increasing.
+This is kind of a problem.
+
+All materials will probably take around one minute to parse.
+
 First parse result for 533 materials:
 43 could not be parsed.
 Parse time: 2381 ms
