@@ -1,3 +1,9 @@
+Use hvb-values in materials_dft instead of hardcoded materials thresholds.
+
+1. Replaced unsort energy, energy is now used in the x-axis.
+2. Replaced cosine distance function with a primitive one.
+3. Printed all results to a file as a distance matrix.
+
 For interpolation I need the dos (x-values) to be ordered and to be strictly increasing.
 This is kind of a problem.
 
