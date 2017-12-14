@@ -1,3 +1,13 @@
+14 December 2017, Nordita Meeting
+---
+Meeting at Nordita. Michael and Stas over Skype, the rest were there physically.
+
+I'm supposed to present my work to Michael next week, with HVB-values and a large-scale version.
+
+I'm thinking about branching out for this so I can keep the system in the current state.
+
+Contract/money issues.
+
 Use hvb-values in materials_dft instead of hardcoded materials thresholds.
 
 1. Replaced unsort energy, energy is now used in the x-axis.
