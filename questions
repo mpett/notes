@@ -1,3 +1,17 @@
+17 January 2018
+---
+I have added a JDBC connection to the code now, so I can take out HVB values for each material.
+
+When I set the minimum to -2.0, I get around 20 materials that cannot be interpolated
+because there are not enough values. This breaks the code and needs to be fixed,
+provably by removing affected materials from all data structures and lists.
+
+However, if I set the minimum value at -5.0 instead it works, so this should not be
+a critical misstep.
+
+Meeting today at 15.
+---
+
 14 December 2017, Nordita Meeting
 ---
 Meeting at Nordita. Michael and Stas over Skype, the rest were there physically.
