@@ -1,3 +1,13 @@
+24 January 2018
+---
+Managed to make a search with 4417 materials.
+
+There was a nullpointerfor id 2008472
+There was a nullpointerfor id 4105174
+There was a nullpointerfor id 4105178
+
+The Euclidead plots look good, the cosine look strange.
+
 17 January 2018
 ---
 I have added a JDBC connection to the code now, so I can take out HVB values for each material.
