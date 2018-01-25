@@ -1,3 +1,21 @@
+25 January 2018
+---
+Meeting.
+
+Met with Michael, Bart, Charles, Roberto and Petter.
+
+Agreed to meet Charles on Monday at 14 to make the presentation part
+for the website.
+
+I should be able to calculate all 23k distances by next week as agreed.
+
+Petter helped me solve why the cosine distances looked weird,
+we took the arccos of the result of each calculation and
+it produced better results.
+
+We had a discussion wether to use Euclidean or cosine distances and
+there were no real agreements there.
+
 24 January 2018
 ---
 Managed to make a search with 4417 materials.
