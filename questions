@@ -1,3 +1,82 @@
+26 January 2018
+---
+CREATE TABLE dos_vectors (
+    vector_id int,
+    material_id int,
+    cod_id int,
+    parsed_dos_vector text,
+    interpolated_dos_vector text,
+    parsed_energy_vector text,
+    close_materials text,
+    hvb_e double
+);
+
+CREATE TABLE IF NOT EXISTS material_dos_vectors (
+  vector_id INT(11) NOT NULL AUTO_INCREMENT,
+  material_id INT(11) NOT NULL,
+  cod_id INT(11) NOT NULL,
+  parsed_dos_vector VARCHAR(35000) DEFAULT NULL,
+  interpolated_dos_vector VARCHAR(35000) DEFAULT NULL,
+  parsed_energy_vector VARCHAR(35000) DEFAULT NULL,
+  hvb_e DOUBLE DEFAULT_NULL,
+  close_materials VARCHAR(3500) DEFAULT NULL
+);
+
+We want to create a table for holding data.
+
+id  int
+material_id int
+cod_id  int
+parsed_dos_vector   varchar
+interpolated_dos_vector varchar
+parsed_energy_vector    varchar
+hvb_e   double
+
+
+---
+
+scp omdb@74.207.253.254:/home/omdb/diraclaravel/data/materials/_cod_database_code/* .
+$2GB2_vuq?Y33
+
+rsync -a -essh -P omdb@74.207.253.254:/home/omdb/diraclaravel/data/materials/_cod_database_code/ .
+
+
+HVB
+7006119
+4024256
+
+---
+4105178
+
+2006985
+
+---
+
+ArrayList<Integer> keysToBeRemoved = new ArrayList<>();
+        ArrayList<Integer> indicesToBeRemoved = new ArrayList<>();
+
+        int keyIndex = 0;
+        for (int key : keys) {
+            keyIndex++;
+            try {
+                System.err.println(key);
+                Material m = materials.get(key);
+                System.err.println(m);
+            } catch (NullPointerException e) {
+                keysToBeRemoved.add(key);
+                indicesToBeRemoved.add(keyIndex);
+            }
+        }
+
+        for (int keyToBeRemoved : keysToBeRemoved) {
+            materials.remove(keyToBeRemoved);
+        }
+
+        for (int indexToBeRemoved : indicesToBeRemoved)
+            mId.remove(indexToBeRemoved);
+---
+
+
 25 January 2018
 ---
 Meeting.
