@@ -1,3 +1,33 @@
+29 January 2018
+---
+Met up with Charles at AlbaNova.
+
+I can now calculate distances for all materials,
+however each material takes around 30 seconds to calculate
+which needs to be fixed. I believe it is due to the database
+transaction time, so if we work with text files on the file
+system it should work much faster.
+
+Also wrote a function for creating a table which will be used
+for the presentation part. Charles wrote the front-end part today.
+
+Thinking about building a graph or another kind of visualization
+when all results are here.
+
+Other things,
+there are around 23k materials, and I have around 18k HVB_E-values.
+So around 4000 are missing. For these I use a static window frame
+from 0.0 to -2.0 eV.
+
+Some 1470 materials could not be parsed at all, so these are probably
+magnetic ones.
+
+After that there were around 10 materials we could not interpolate
+because they had too few points.
+
+There were also some 5 or 10 materials with blank vector fields in
+the database tables. I removed these.
+
 26 January 2018
 ---
 CREATE TABLE dos_vectors (
