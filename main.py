@@ -5,11 +5,15 @@ import ast
 import pymysql.cursors
 import numpy as np
 import matplotlib.pyplot as plt
+
 from pprint import pprint
 from scipy.spatial.distance import cdist, cosine
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.collections import PolyCollection
+from matplotlib import colors as mcolors
 
 #
-MATERIALS_PATH = '../materials/_cod_database_code/'
+MATERIALS_PATH = '/Users/martinpettersson/materials/'
 EXAMPLE_MATERIAL = '1008775'
 DOS_PATH = 'DOS/dos.json'
 OUTPUT_FILE = './output'
@@ -184,9 +188,15 @@ def compute_distances():
         now = time.time()
 
         # Compute distances and sort
-        similarities = find_similar_materials(connection, all_dos, material_id)
-        similarities_sorted = sorted(similarities, key = lambda tup: tup[1])
-        similarities_dict[material_id] = similarities_sorted[0:10]
+        try:
+            similarities = find_similar_materials(connection, all_dos, material_id)
+            similarities_sorted = sorted(similarities, key = lambda tup: tup[1])
+            similarities_dict[material_id] = similarities_sorted[0:10]
+        except Exception as e:
+            later = time.time()
+            difference = round(later - now, 3)
+            print("Exception for material " + str(k+1) + "/" + str(len(material_ids)) + " (COD ID: " + str(material_id) + ") in " + str(difference) + " second(s)")
+            continue
 
         # Display computation time
         later = time.time()
@@ -201,6 +211,48 @@ def compute_distances():
     # Close database connection
     connection.close()
 
+def plot_similar_materials_3d(material_id):
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    connection = get_db_connection()
+
+    similarities_dict = {}
+    with open(OUTPUT_FILE, 'r') as f:
+        s = f.read()
+        similarities_dict = ast.literal_eval(s)
+
+    current_similarities = similarities_dict[str(material_id)]
+
+    xs = np.arange(0, 1000, 1.0)
+    verts = []
+    zs = np.arange(0, len(current_similarities), 1.0)
+    max_values = []
+
+    for similarity in current_similarities:
+        # Interpolate then plot the DOS
+        dos = get_interpolated_dos(connection, similarity[0])
+        ys = dos
+        max_values.append(max(ys))
+        ys[0], ys[-1] = 0, 0
+        verts.append(list(zip(xs, ys)))
+
+    colors = [(0.18, 0.5, 0.72, 1)] + [(np.random.rand(1)[0],
+            np.random.rand(1)[0],np.random.rand(1)[0], 1-i) 
+            for i in np.linspace(0.5, 1, len(verts)-1)]
+
+    poly = PolyCollection(verts, facecolors=colors)
+    poly.set_alpha(0.7)
+    ax.add_collection3d(poly, zs=zs, zdir='y')
+
+    ax.set_xlabel('X')
+    ax.set_xlim3d(0, len(xs))
+    ax.set_ylabel('Y')
+    ax.set_ylim3d(-1, len(current_similarities))
+    ax.set_zlabel('Z')
+    ax.set_zlim3d(0, max(max_values))
+
+    plt.show()
 
 def plot_similar_materials(material_id):
     '''
@@ -234,6 +286,7 @@ def plot_similar_materials(material_id):
         # Interpolate then plot the DOS
         dos = get_interpolated_dos(connection, similarity[0])
         labels.append(similarity[0])
+        print(dos)
         plt.plot(dos)
     plt.legend(labels)
     plt.show()
@@ -243,4 +296,5 @@ if __name__ == '__main__':
     #compute_distances()
 
     # To visualize results with plots:
-    plot_similar_materials(1008776)
+    plot_similar_materials(2226426)
+    plot_similar_materials_3d(2226426)
