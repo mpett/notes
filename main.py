@@ -183,6 +183,7 @@ def compute_distances():
     # Compute all the distances
     similarities_dict = {}
     k = 0
+    faulty_materials = []
     for material_id in material_ids:
         # Start timer
         now = time.time()
@@ -191,11 +192,12 @@ def compute_distances():
         try:
             similarities = find_similar_materials(connection, all_dos, material_id)
             similarities_sorted = sorted(similarities, key = lambda tup: tup[1])
-            similarities_dict[material_id] = similarities_sorted[0:10]
+            similarities_dict[material_id] = similarities_sorted[0:15]
         except Exception as e:
             later = time.time()
             difference = round(later - now, 3)
             print("Exception for material " + str(k+1) + "/" + str(len(material_ids)) + " (COD ID: " + str(material_id) + ") in " + str(difference) + " second(s)")
+            faulty_materials.append(material_id)
             continue
 
         # Display computation time
@@ -207,6 +209,9 @@ def compute_distances():
     # Persist the similarities dictionnary
     with open(OUTPUT_FILE, 'w+') as f:
         f.write(json.dumps(similarities_dict))
+    
+    print("Computation is now complete.")
+    print(str(len(faulty_materials)) + " could not be calculated.")
 
     # Close database connection
     connection.close()
@@ -296,5 +301,5 @@ if __name__ == '__main__':
     #compute_distances()
 
     # To visualize results with plots:
-    plot_similar_materials(2226426)
-    plot_similar_materials_3d(2226426)
+    plot_similar_materials(4331256)
+    plot_similar_materials_3d(4331256)
