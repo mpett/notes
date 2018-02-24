@@ -1,3 +1,19 @@
+24 February 2018
+---
+CREATE TABLE similarities (
+    reference int,
+    euc_1 int,
+    euc_2 int,
+    euc_3 int,
+    euc_4 int,
+    euc_5 int,
+    euc_6 int,
+    euc_7 int,
+    euc_8 int,
+    euc_9 int,
+    euc_10 int
+);
+
 11 February 2018
 ---
 
