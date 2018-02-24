@@ -5,7 +5,6 @@ import ast
 import pymysql.cursors
 import numpy as np
 import matplotlib.pyplot as plt
-
 from pprint import pprint
 from scipy.spatial.distance import cdist, cosine
 from mpl_toolkits.mplot3d import Axes3D
@@ -13,7 +12,7 @@ from matplotlib.collections import PolyCollection
 from matplotlib import colors as mcolors
 
 #
-MATERIALS_PATH = '/Users/martinpettersson/materials/'
+MATERIALS_PATH = '/Users/martin/materials/'
 EXAMPLE_MATERIAL = '1008775'
 DOS_PATH = 'DOS/dos.json'
 OUTPUT_FILE = './output'
@@ -23,7 +22,7 @@ DB_HOST='localhost'
 DB_PORT='3306'
 DB_DATABASE='omdb'
 DB_USERNAME='root'
-DB_PASSWORD='man3.pett'
+DB_PASSWORD='Man3.pett'
 
 #
 INTERPOLATION_POINTS = 1000
@@ -158,7 +157,7 @@ def find_similar_materials(connection, all_dos, current_material_id):
     base_dos = [x[1] for i,x in enumerate(all_dos) if x[0] == current_material_id][0]
 
     # Compute all the distances
-    distances = cdist([base_dos], other_dos, metric = 'euclidean')[0]#).tolist()
+    distances = cdist([base_dos], other_dos, metric = 'cosine')[0]#).tolist()
 
     # Zip and return
     return list(zip(other_ids, distances))
@@ -178,12 +177,11 @@ def compute_distances():
     all_dos = interpolate_all_dos(connection, material_ids)
 
     # Remove this line if you want to compute all possible distances
-    material_ids = [1008776, 1008775, 1008787]
+    material_ids = [1008776, 1008775, 1008787, 4060666, 4021827, 8000075]
 
     # Compute all the distances
     similarities_dict = {}
     k = 0
-    faulty_materials = []
     for material_id in material_ids:
         # Start timer
         now = time.time()
@@ -192,12 +190,11 @@ def compute_distances():
         try:
             similarities = find_similar_materials(connection, all_dos, material_id)
             similarities_sorted = sorted(similarities, key = lambda tup: tup[1])
-            similarities_dict[material_id] = similarities_sorted[0:15]
+            similarities_dict[material_id] = similarities_sorted[0:10]
         except Exception as e:
             later = time.time()
             difference = round(later - now, 3)
             print("Exception for material " + str(k+1) + "/" + str(len(material_ids)) + " (COD ID: " + str(material_id) + ") in " + str(difference) + " second(s)")
-            faulty_materials.append(material_id)
             continue
 
         # Display computation time
@@ -209,9 +206,6 @@ def compute_distances():
     # Persist the similarities dictionnary
     with open(OUTPUT_FILE, 'w+') as f:
         f.write(json.dumps(similarities_dict))
-    
-    print("Computation is now complete.")
-    print(str(len(faulty_materials)) + " could not be calculated.")
 
     # Close database connection
     connection.close()
@@ -296,10 +290,43 @@ def plot_similar_materials(material_id):
     plt.legend(labels)
     plt.show()
 
+def export_similarities():
+    # Set up database connection
+    connection = get_db_connection()
+
+    # Get the cod id of all materials
+    material_ids = get_all_material_ids(connection) #[0:100]
+
+    similarities_dict = {}
+    with open(OUTPUT_FILE, 'r') as f:
+        s = f.read()
+        similarities_dict = ast.literal_eval(s)
+
+    for material_id in material_ids:
+        try:
+            current_similarities = similarities_dict[str(material_id)]
+        except Exception as e:
+            print("Probable KeyError on material " + str(material_id))
+            continue
+
+        with connection.cursor() as cursor:
+            # Read a single record
+            sql = (
+                'INSERT INTO similarities (reference, euc_1, euc_2, euc_3, euc_4, euc_5, euc_6, euc_7, euc_8, euc_9, euc_10) '
+                'VALUES (' + str(material_id) + ', ' + str(current_similarities[0][0]) + ', ' + str(current_similarities[1][0]) + ', ' + str(current_similarities[2][0]) + ', ' + str(current_similarities[3][0]) + ', ' + str(current_similarities[4][0]) + ', ' + str(current_similarities[5][0]) + ', ' + str(current_similarities[6][0]) + ', ' + str(current_similarities[7][0]) + ', ' + str(current_similarities[8][0]) + ', ' + str(current_similarities[9][0]) + ') '
+            )
+            # Parse result and return
+            cursor.execute(sql)
+            connection.commit()
+            print(str(sql))
+    
+    print("Similarity export complete.")
+
 if __name__ == '__main__':
     # To run the distance computation:
-    #compute_distances()
+    # compute_distances()
 
     # To visualize results with plots:
-    plot_similar_materials(4331256)
-    plot_similar_materials_3d(4331256)
+    plot_similar_materials(8000075)
+    plot_similar_materials_3d(8000075)
+    #export_similarities()
