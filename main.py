@@ -157,7 +157,7 @@ def find_similar_materials(connection, all_dos, current_material_id):
     base_dos = [x[1] for i,x in enumerate(all_dos) if x[0] == current_material_id][0]
 
     # Compute all the distances
-    distances = cdist([base_dos], other_dos, metric = 'cosine')[0]#).tolist()
+    distances = cdist([base_dos], other_dos, metric = 'euclidean')[0]#).tolist()
 
     # Zip and return
     return list(zip(other_ids, distances))
@@ -177,7 +177,7 @@ def compute_distances():
     all_dos = interpolate_all_dos(connection, material_ids)
 
     # Remove this line if you want to compute all possible distances
-    material_ids = [1008776, 1008775, 1008787, 4060666, 4021827, 8000075]
+    # material_ids = [1008776, 1008775, 1008787, 4060666, 4021827, 8000075]
 
     # Compute all the distances
     similarities_dict = {}
@@ -306,27 +306,79 @@ def export_similarities():
         try:
             current_similarities = similarities_dict[str(material_id)]
         except Exception as e:
-            print("Probable KeyError on material " + str(material_id))
+            #print("Probable KeyError on material " + str(material_id))
             continue
-
-        with connection.cursor() as cursor:
-            # Read a single record
-            sql = (
-                'INSERT INTO similarities (reference, euc_1, euc_2, euc_3, euc_4, euc_5, euc_6, euc_7, euc_8, euc_9, euc_10) '
-                'VALUES (' + str(material_id) + ', ' + str(current_similarities[0][0]) + ', ' + str(current_similarities[1][0]) + ', ' + str(current_similarities[2][0]) + ', ' + str(current_similarities[3][0]) + ', ' + str(current_similarities[4][0]) + ', ' + str(current_similarities[5][0]) + ', ' + str(current_similarities[6][0]) + ', ' + str(current_similarities[7][0]) + ', ' + str(current_similarities[8][0]) + ', ' + str(current_similarities[9][0]) + ') '
-            )
-            # Parse result and return
-            cursor.execute(sql)
-            connection.commit()
-            print(str(sql))
+        try:
+            with connection.cursor() as cursor:
+                # Read a single record
+                sql = (
+                    'INSERT INTO similarities (reference, euc_1, euc_2, euc_3, euc_4, euc_5, euc_6, euc_7, euc_8, euc_9, euc_10) '
+                    'VALUES (' + str(material_id) + ', ' + str(current_similarities[0][0]) + ', ' + str(current_similarities[1][0]) + ', ' + str(current_similarities[2][0]) + ', ' + str(current_similarities[3][0]) + ', ' + str(current_similarities[4][0]) + ', ' + str(current_similarities[5][0]) + ', ' + str(current_similarities[6][0]) + ', ' + str(current_similarities[7][0]) + ', ' + str(current_similarities[8][0]) + ', ' + str(current_similarities[9][0]) + ') '
+                )
+                # Parse result and return
+                cursor.execute(sql)
+                connection.commit()
+                print(str(sql))
+            with connection.cursor() as cursor:
+                # Read a single record
+                sql = (
+                    'UPDATE similarities '
+                    'SET euc_1_val=' + str(current_similarities[0][1]) + ', euc_2_val=' + str(current_similarities[1][1]) + ', euc_3_val=' + str(current_similarities[2][1]) + ', euc_4_val=' + str(current_similarities[3][1]) + ', euc_5_val=' + str(current_similarities[4][1]) + ', euc_6_val=' + str(current_similarities[5][1]) + ', euc_7_val=' + str(current_similarities[6][1]) + ', euc_8_val=' + str(current_similarities[7][1]) + ', euc_9_val=' + str(current_similarities[8][1]) + ', euc_10_val=' + str(current_similarities[9][1]) + ' '
+                    'WHERE reference=' + str(material_id) + ' '
+                )
+                # Parse result and return
+                cursor.execute(sql)
+                connection.commit()
+                print(str(sql))
+                
+        except Exception as e:
+            print("Similarities table did not exist, so we will attempt to create it.")
+            create_similarities_table()
+            return
     
     print("Similarity export complete.")
 
+def create_similarities_table():
+    connection = get_db_connection()
+
+    with connection.cursor() as cursor:
+        sql = (
+            'CREATE TABLE similarities ( '
+            'reference int, '
+            'euc_1 int, '
+            'euc_2 int, '
+            'euc_3 int, '
+            'euc_4 int, '
+            'euc_5 int, '
+            'euc_6 int, '
+            'euc_7 int, '
+            'euc_8 int, '
+            'euc_9 int, '
+            'euc_10 int, '
+            'euc_1_val double, ' 
+            'euc_2_val double, ' 
+            'euc_3_val double, ' 
+            'euc_4_val double, ' 
+            'euc_5_val double, ' 
+            'euc_6_val double, ' 
+            'euc_7_val double, ' 
+            'euc_8_val double, ' 
+            'euc_9_val double, ' 
+            'euc_10_val double ' 
+            ' )'
+        )
+        cursor.execute(sql)
+        connection.commit()
+        print(str(sql))
+    print("Successfully created similarities table.")
+    export_similarities()
+
 if __name__ == '__main__':
     # To run the distance computation:
-    # compute_distances()
+    compute_distances()
 
     # To visualize results with plots:
-    plot_similar_materials(8000075)
-    plot_similar_materials_3d(8000075)
-    #export_similarities()
+    #plot_similar_materials(8000075)
+    #plot_similar_materials_3d(8000075)
+    export_similarities()
+    
