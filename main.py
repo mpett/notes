@@ -5,6 +5,7 @@ import ast
 import pymysql.cursors
 import numpy as np
 import matplotlib.pyplot as plt
+
 from pprint import pprint
 from scipy.spatial.distance import cdist, cosine
 from mpl_toolkits.mplot3d import Axes3D
@@ -78,7 +79,6 @@ def interpolate_dos(energy_window, e, dos):
     space = np.linspace(energy_window[0], energy_window[1], num=INTERPOLATION_POINTS)
     return np.interp(space, e, dos)
 
-
 def get_all_material_ids(connection):
     with connection.cursor() as cursor:
         # Read a single record
@@ -111,7 +111,6 @@ def get_interpolated_dos(connection, material_id):
             raise(e)
     else:
         return False
-
 
 def interpolate_all_dos(connection, all_materials):
     '''
@@ -147,7 +146,6 @@ def interpolate_all_dos(connection, all_materials):
     print("Fetched and interpolated all DOS in " + str(difference) + " second(s)")
     return all_dos
 
-
 def find_similar_materials(connection, all_dos, current_material_id):
     # Get all DOS for comparison
     other_dos = [dos[1] for dos in all_dos]
@@ -161,7 +159,6 @@ def find_similar_materials(connection, all_dos, current_material_id):
 
     # Zip and return
     return list(zip(other_ids, distances))
-
 
 def compute_distances():
     '''
@@ -177,7 +174,7 @@ def compute_distances():
     all_dos = interpolate_all_dos(connection, material_ids)
 
     # Remove this line if you want to compute all possible distances
-    # material_ids = [1008776, 1008775, 1008787, 4060666, 4021827, 8000075]
+    material_ids = [1008776, 1008775, 1008787, 4060666, 4021827, 8000075]
 
     # Compute all the distances
     similarities_dict = {}
@@ -376,9 +373,8 @@ def create_similarities_table():
 if __name__ == '__main__':
     # To run the distance computation:
     compute_distances()
+    export_similarities()
 
     # To visualize results with plots:
     #plot_similar_materials(8000075)
     #plot_similar_materials_3d(8000075)
-    export_similarities()
-    
