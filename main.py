@@ -36,6 +36,7 @@ def get_db_connection():
                                  cursorclass=pymysql.cursors.DictCursor)
     return connection
 
+
 def read_material_json(cod_id):
     '''
     Reads material DOS information from json file
@@ -53,6 +54,7 @@ def read_material_json(cod_id):
 
     except Exception as e:
         pass
+
 
 def get_interpolation_window(connection, material):
     '''
@@ -72,12 +74,15 @@ def get_interpolation_window(connection, material):
             hvb_e = result["HVB_E"]
             return [hvb_e-2., hvb_e]
 
+
 def interpolate_dos(energy_window, e, dos):
     '''
-    Returns an interpolation of (e, dos) in the range energy_window made of INTERPOLATION_POINTS points.
+    Returns an interpolation of (e, dos) in the 
+    range energy_window made of INTERPOLATION_POINTS points.
     '''
     space = np.linspace(energy_window[0], energy_window[1], num=INTERPOLATION_POINTS)
     return np.interp(space, e, dos)
+
 
 def get_all_material_ids(connection):
     with connection.cursor() as cursor:
@@ -90,6 +95,7 @@ def get_all_material_ids(connection):
         cursor.execute(sql)
         results = cursor.fetchall()
         return [material["_cod_database_code"] for material in results]
+
 
 def get_interpolated_dos(connection, material_id):
     '''
@@ -112,6 +118,7 @@ def get_interpolated_dos(connection, material_id):
     else:
         return False
 
+
 def interpolate_all_dos(connection, all_materials):
     '''
     Takes a list of material ids and returns their DOS interpolation
@@ -126,7 +133,8 @@ def interpolate_all_dos(connection, all_materials):
 
         # Print progress
         if k % 1000 == 0:
-            print("Interpolating DOS for all materials.. (" + str(k) + "/" + str(len(all_materials)) + ")")
+            print("Interpolating DOS for all materials.. (" + str(k) 
+            + "/" + str(len(all_materials)) + ")")
         k = k + 1
 
         # Handle errors (not all materials have valid DOS information)
@@ -142,9 +150,11 @@ def interpolate_all_dos(connection, all_materials):
     # Print time and return
     later = time.time()
     difference = round(later - now, 3)
-    print("Found " + str(len(all_dos)) + "/" + str(len(all_materials)) + " materials with valid DOS information")
+    print("Found " + str(len(all_dos)) + "/" + str(len(all_materials)) 
+    + " materials with valid DOS information")
     print("Fetched and interpolated all DOS in " + str(difference) + " second(s)")
     return all_dos
+
 
 def find_similar_materials(connection, all_dos, current_material_id):
     # Get all DOS for comparison
@@ -160,6 +170,7 @@ def find_similar_materials(connection, all_dos, current_material_id):
     # Zip and return
     return list(zip(other_ids, distances))
 
+
 def compute_distances():
     '''
     High-level method with the whole distance computation pipeline
@@ -174,7 +185,7 @@ def compute_distances():
     all_dos = interpolate_all_dos(connection, material_ids)
 
     # Remove this line if you want to compute all possible distances
-    material_ids = [1008776, 1008775, 1008787, 4060666, 4021827, 8000075]
+    # material_ids = [1008776, 1008775, 1008787, 4060666, 4021827, 8000075]
 
     # Compute all the distances
     similarities_dict = {}
@@ -191,13 +202,17 @@ def compute_distances():
         except Exception as e:
             later = time.time()
             difference = round(later - now, 3)
-            print("Exception for material " + str(k+1) + "/" + str(len(material_ids)) + " (COD ID: " + str(material_id) + ") in " + str(difference) + " second(s)")
+            print("Exception for material " + str(k+1) + "/" 
+            + str(len(material_ids)) + " (COD ID: " + str(material_id) + ") in " 
+            + str(difference) + " second(s)")
             continue
 
         # Display computation time
         later = time.time()
         difference = round(later - now, 3)
-        print("Finished computation for material " + str(k+1) + "/" + str(len(material_ids)) + " (COD ID: " + str(material_id) + ") in " + str(difference) + " second(s)")
+        print("Finished computation for material " + str(k+1) + "/" 
+        + str(len(material_ids)) + " (COD ID: " + str(material_id) + ") in " 
+        + str(difference) + " second(s)")
         k = k + 1
 
     # Persist the similarities dictionnary
@@ -206,6 +221,7 @@ def compute_distances():
 
     # Close database connection
     connection.close()
+
 
 def plot_similar_materials_3d(material_id):
     fig = plt.figure()
@@ -250,6 +266,7 @@ def plot_similar_materials_3d(material_id):
 
     plt.show()
 
+
 def plot_similar_materials(material_id):
     '''
     High-level method to display the DOS of some material and the similar ones
@@ -271,7 +288,8 @@ def plot_similar_materials(material_id):
     colormap = plt.cm.hot
     plt.gca().set_prop_cycle(
         # First line is in the OMDB blue, next ones are gray with decreasing opacity
-        cycler('color', [(0.18, 0.5, 0.72, 1)] + [(0.4,0.4,0.4, 1-i) for i in np.linspace(0.5, 1, len(current_similarities)-1)]) +
+        cycler('color', [(0.18, 0.5, 0.72, 1)] 
+        + [(0.4,0.4,0.4, 1-i) for i in np.linspace(0.5, 1, len(current_similarities)-1)]) +
         # Decreasing line width
         cycler('linewidth', [1-i for i in np.linspace(0, 0.5, len(current_similarities))])
     )
@@ -286,6 +304,7 @@ def plot_similar_materials(material_id):
         plt.plot(dos)
     plt.legend(labels)
     plt.show()
+
 
 def export_similarities():
     # Set up database connection
@@ -309,8 +328,15 @@ def export_similarities():
             with connection.cursor() as cursor:
                 # Read a single record
                 sql = (
-                    'INSERT INTO similarities (reference, euc_1, euc_2, euc_3, euc_4, euc_5, euc_6, euc_7, euc_8, euc_9, euc_10) '
-                    'VALUES (' + str(material_id) + ', ' + str(current_similarities[0][0]) + ', ' + str(current_similarities[1][0]) + ', ' + str(current_similarities[2][0]) + ', ' + str(current_similarities[3][0]) + ', ' + str(current_similarities[4][0]) + ', ' + str(current_similarities[5][0]) + ', ' + str(current_similarities[6][0]) + ', ' + str(current_similarities[7][0]) + ', ' + str(current_similarities[8][0]) + ', ' + str(current_similarities[9][0]) + ') '
+                    'INSERT INTO similarities '
+                    '(reference, euc_1, euc_2, euc_3, euc_4, euc_5, '
+                    'euc_6, euc_7, euc_8, euc_9, euc_10) '
+                    'VALUES (' + str(material_id) + ', ' + str(current_similarities[0][0]) + ', ' 
+                    + str(current_similarities[1][0]) + ', ' + str(current_similarities[2][0]) + ', ' 
+                    + str(current_similarities[3][0]) + ', ' + str(current_similarities[4][0]) + ', ' 
+                    + str(current_similarities[5][0]) + ', ' + str(current_similarities[6][0]) + ', ' 
+                    + str(current_similarities[7][0]) + ', ' + str(current_similarities[8][0]) + ', ' 
+                    + str(current_similarities[9][0]) + ') '
                 )
                 # Parse result and return
                 cursor.execute(sql)
@@ -320,7 +346,16 @@ def export_similarities():
                 # Read a single record
                 sql = (
                     'UPDATE similarities '
-                    'SET euc_1_val=' + str(current_similarities[0][1]) + ', euc_2_val=' + str(current_similarities[1][1]) + ', euc_3_val=' + str(current_similarities[2][1]) + ', euc_4_val=' + str(current_similarities[3][1]) + ', euc_5_val=' + str(current_similarities[4][1]) + ', euc_6_val=' + str(current_similarities[5][1]) + ', euc_7_val=' + str(current_similarities[6][1]) + ', euc_8_val=' + str(current_similarities[7][1]) + ', euc_9_val=' + str(current_similarities[8][1]) + ', euc_10_val=' + str(current_similarities[9][1]) + ' '
+                    'SET euc_1_val=' + str(current_similarities[0][1]) + ', euc_2_val=' + 
+                    str(current_similarities[1][1]) + ', euc_3_val=' + 
+                    str(current_similarities[2][1]) + ', euc_4_val=' + 
+                    str(current_similarities[3][1]) + ', euc_5_val=' + 
+                    str(current_similarities[4][1]) + ', euc_6_val=' + 
+                    str(current_similarities[5][1]) + ', euc_7_val=' + 
+                    str(current_similarities[6][1]) + ', euc_8_val=' + 
+                    str(current_similarities[7][1]) + ', euc_9_val=' + 
+                    str(current_similarities[8][1]) + ', euc_10_val=' + 
+                    str(current_similarities[9][1]) + ' '
                     'WHERE reference=' + str(material_id) + ' '
                 )
                 # Parse result and return
@@ -334,6 +369,7 @@ def export_similarities():
             return
     
     print("Similarity export complete.")
+
 
 def create_similarities_table():
     connection = get_db_connection()
@@ -370,11 +406,13 @@ def create_similarities_table():
     print("Successfully created similarities table.")
     export_similarities()
 
+
 if __name__ == '__main__':
     # To run the distance computation:
     compute_distances()
-    export_similarities()
 
     # To visualize results with plots:
-    #plot_similar_materials(8000075)
-    #plot_similar_materials_3d(8000075)
+    plot_similar_materials(8000075)
+    plot_similar_materials_3d(8000075)
+    export_similarities()
+    
