@@ -533,7 +533,7 @@ Nordita-möte. Nu en massa käftande om att jag har jobbat med fel saker (gjorde
 istället för tabellimport på hemsidan). Känns som en situation där jag inte blir litad på.
 Tar det ganska allvarligt.
 
-Lördag 25 januari 2018
+Söndag 25 februari 2018
 ---
 
 Jag tror att jag har en ganska unik förmåga att bygga upp vackra saker och en vacker stämning
@@ -559,4 +559,23 @@ Nu händer det igen på Nordita. Dom ska bygga ut forskningsprojektet till ett f
 fortsätta jobba på det jag ursprungligen skulle jobba med. Alla får beröm, jag får en massa skit
 för att jag inte är engagerad på samma sätt som resten av människorna, trots att det är jag som är
 orsaken till engagemanget.
+
+Fredag 2 mars 2018
+---
+Sover väldigt mycket numera och det är i princip helt fritt från drömmar.
+
+Träffat Charles igen, vi skrev klart php-delen till recommender-delen i OMDB så den biten är i
+princip färdig. Inget möte nästa vecka pga att Nordita-gänget åker iväg på någon form
+av konferens.
+
+På mötet sade vi att jag borde göra user-recommendations, göra en visualisering alternativt börja
+jobba med ett nytt recommender-system för kristallstrukturer.
+
+Problemet är att pengarna på allvar börjar ta slut. Jag behöver söka jobb. Ska kanske fråga dem om
+jag kan få ett jobb på Nordita, men det kanske blir svårt då jag har varken examen eller några
+referenser. Hoppas att det här löser sig. Historiskt sett har det gjort det i mitt liv.
+
+Har tänkt väldigt mycket på Katrin som jobbade på Swedbank. Det har gått ett år sedan jag började där.
+Hon var en väldigt fin människa, jag saknar henne.
+
 
