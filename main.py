@@ -29,6 +29,9 @@ DB_PASSWORD='Man3.pett'
 INTERPOLATION_POINTS = 1000
 
 def get_db_connection():
+    '''
+    Sets up the database connection
+    '''
     connection = pymysql.connect(host=DB_HOST,
                                  user=DB_USERNAME,
                                  password=DB_PASSWORD,
@@ -85,6 +88,9 @@ def interpolate_dos(energy_window, e, dos):
 
 
 def get_all_material_ids(connection):
+    '''
+    Returns a list with all COD ID:s from the database
+    '''
     with connection.cursor() as cursor:
         # Read a single record
         sql = (
@@ -157,6 +163,10 @@ def interpolate_all_dos(connection, all_materials):
 
 
 def find_similar_materials(connection, all_dos, current_material_id):
+    '''
+    Computes euclidean distances for all materials to the reference
+    and returns them as a list
+    '''
     # Get all DOS for comparison
     other_dos = [dos[1] for dos in all_dos]
     other_ids = [dos[0] for dos in all_dos]
@@ -224,23 +234,32 @@ def compute_distances():
 
 
 def plot_similar_materials_3d(material_id):
+    '''
+    Plots top candidates for passed material.
+    3D plots with a mosaic color style.
+    '''
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
+    # Sets up the database connection
     connection = get_db_connection()
 
+    # Finds all similar materials
     similarities_dict = {}
     with open(OUTPUT_FILE, 'r') as f:
         s = f.read()
         similarities_dict = ast.literal_eval(s)
 
+    # Similarities for the current material
     current_similarities = similarities_dict[str(material_id)]
 
+    # Set up plot dimensions
     xs = np.arange(0, 1000, 1.0)
     verts = []
     zs = np.arange(0, len(current_similarities), 1.0)
     max_values = []
 
+    # Process each material
     for similarity in current_similarities:
         # Interpolate then plot the DOS
         dos = get_interpolated_dos(connection, similarity[0])
@@ -249,14 +268,17 @@ def plot_similar_materials_3d(material_id):
         ys[0], ys[-1] = 0, 0
         verts.append(list(zip(xs, ys)))
 
+    # The mosaic color style
     colors = [(0.18, 0.5, 0.72, 1)] + [(np.random.rand(1)[0],
             np.random.rand(1)[0],np.random.rand(1)[0], 1-i) 
             for i in np.linspace(0.5, 1, len(verts)-1)]
 
+    # Legends and colors
     poly = PolyCollection(verts, facecolors=colors)
     poly.set_alpha(0.7)
     ax.add_collection3d(poly, zs=zs, zdir='y')
 
+    # Legends and colors
     ax.set_xlabel('X')
     ax.set_xlim3d(0, len(xs))
     ax.set_ylabel('Y')
@@ -264,6 +286,7 @@ def plot_similar_materials_3d(material_id):
     ax.set_zlabel('Z')
     ax.set_zlim3d(0, max(max_values))
 
+    # Finally display the plots
     plt.show()
 
 
@@ -307,17 +330,24 @@ def plot_similar_materials(material_id):
 
 
 def export_similarities():
+    '''
+    Exports the top 10 similarities for each material to a database table.
+    If the table does not exist in the omdb database, we will attempt
+    to create it.
+    '''
     # Set up database connection
     connection = get_db_connection()
 
     # Get the cod id of all materials
     material_ids = get_all_material_ids(connection) #[0:100]
 
+    # Fetch all similarities
     similarities_dict = {}
     with open(OUTPUT_FILE, 'r') as f:
         s = f.read()
         similarities_dict = ast.literal_eval(s)
 
+    # Iterate through all materials
     for material_id in material_ids:
         try:
             current_similarities = similarities_dict[str(material_id)]
@@ -363,6 +393,7 @@ def export_similarities():
                 connection.commit()
                 print(str(sql))
                 
+        # If the similarities table is non-present we will end up here.
         except Exception as e:
             print("Similarities table did not exist, so we will attempt to create it.")
             create_similarities_table()
@@ -372,8 +403,15 @@ def export_similarities():
 
 
 def create_similarities_table():
+    '''
+    Creates a table used for storing top similarities
+    based on each material's COD id.
+    '''
+
+    # Set up database connection
     connection = get_db_connection()
 
+    # Connect and create the table
     with connection.cursor() as cursor:
         sql = (
             'CREATE TABLE similarities ( '
@@ -403,6 +441,8 @@ def create_similarities_table():
         cursor.execute(sql)
         connection.commit()
         print(str(sql))
+
+    # Print something and return to the export function
     print("Successfully created similarities table.")
     export_similarities()
 
@@ -414,5 +454,7 @@ if __name__ == '__main__':
     # To visualize results with plots:
     plot_similar_materials(8000075)
     plot_similar_materials_3d(8000075)
+
+    # To export the materials to the similarities table:
     export_similarities()
     
