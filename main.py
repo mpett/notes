@@ -12,18 +12,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.collections import PolyCollection
 from matplotlib import colors as mcolors
 
-#
-MATERIALS_PATH = '/Users/martin/materials/'
-EXAMPLE_MATERIAL = '1008775'
-DOS_PATH = 'DOS/dos.json'
-OUTPUT_FILE = './output'
+from config import *
 
-#
-DB_HOST='localhost'
-DB_PORT='3306'
-DB_DATABASE='omdb'
-DB_USERNAME='root'
-DB_PASSWORD='Man3.pett'
 
 #
 INTERPOLATION_POINTS = 1000
@@ -68,7 +58,8 @@ def get_interpolation_window(connection, material):
             sql = (
                 'SELECT DFT.HVB_E '
                 'FROM materials_dft DFT, materials M '
-                'WHERE M.material_id = DFT.material_id AND M._cod_database_code = ' + str(material)
+                'WHERE M.material_id = DFT.material_id AND '
+                'M._cod_database_code = ' + str(material)
             )
 
             # Parse result and return
@@ -195,7 +186,9 @@ def compute_distances():
     all_dos = interpolate_all_dos(connection, material_ids)
 
     # Remove this line if you want to compute all possible distances
-    # material_ids = [1008776, 1008775, 1008787, 4060666, 4021827, 8000075]
+    # material_ids = [1008776, 1008775, 1008787]
+    material_ids = [1008776, 1008775, 1008787, 4060666, 4021827, 8000075]
+    
 
     # Compute all the distances
     similarities_dict = {}
@@ -356,18 +349,54 @@ def export_similarities():
             continue
         try:
             with connection.cursor() as cursor:
+
+                exists = False
+                try:
+                    # Read a single record
+                    sql = (
+                        'SELECT EXISTS(select * from similarities where reference=' + str(material_id) + ') '
+                    )
+                    # Parse result and return
+                    cursor.execute(sql)
+                    results = cursor.fetchone()
+                    exists = True if (int(str(results)[-2:][:1]) == 1) else False
+                    print("Exists " + str(material_id) + ": " + str(exists))
+                except Exception as e:
+                    print("Similarities table did not exist, so we will attempt to create it.")
+                    create_similarities_table()
+                    return
+
+                sql = ""
+                
                 # Read a single record
-                sql = (
-                    'INSERT INTO similarities '
-                    '(reference, euc_1, euc_2, euc_3, euc_4, euc_5, '
-                    'euc_6, euc_7, euc_8, euc_9, euc_10) '
-                    'VALUES (' + str(material_id) + ', ' + str(current_similarities[0][0]) + ', ' 
-                    + str(current_similarities[1][0]) + ', ' + str(current_similarities[2][0]) + ', ' 
-                    + str(current_similarities[3][0]) + ', ' + str(current_similarities[4][0]) + ', ' 
-                    + str(current_similarities[5][0]) + ', ' + str(current_similarities[6][0]) + ', ' 
-                    + str(current_similarities[7][0]) + ', ' + str(current_similarities[8][0]) + ', ' 
-                    + str(current_similarities[9][0]) + ') '
-                )
+                if (not exists):
+                    sql = (
+                        'INSERT INTO similarities '
+                        '(reference, euc_1, euc_2, euc_3, euc_4, euc_5, '
+                        'euc_6, euc_7, euc_8, euc_9, euc_10) '
+                        'VALUES (' + str(material_id) + ', ' + str(current_similarities[0][0]) + ', ' 
+                        + str(current_similarities[1][0]) + ', ' + str(current_similarities[2][0]) + ', ' 
+                        + str(current_similarities[3][0]) + ', ' + str(current_similarities[4][0]) + ', ' 
+                        + str(current_similarities[5][0]) + ', ' + str(current_similarities[6][0]) + ', ' 
+                        + str(current_similarities[7][0]) + ', ' + str(current_similarities[8][0]) + ', ' 
+                        + str(current_similarities[9][0]) + ') '
+                    )
+                else:
+                    sql = (
+                        'UPDATE similarities '
+                        'SET euc_1=' + str(current_similarities[0][0]) + ', euc_2=' + 
+                        str(current_similarities[1][0]) + ', euc_3=' + 
+                        str(current_similarities[2][0]) + ', euc_4=' + 
+                        str(current_similarities[3][0]) + ', euc_5=' + 
+                        str(current_similarities[4][0]) + ', euc_6=' + 
+                        str(current_similarities[5][0]) + ', euc_7=' + 
+                        str(current_similarities[6][0]) + ', euc_8=' + 
+                        str(current_similarities[7][0]) + ', euc_9=' + 
+                        str(current_similarities[8][0]) + ', euc_10=' + 
+                        str(current_similarities[9][0]) + ' '
+                        'WHERE reference=' + str(material_id) + ' '
+                    )
+
                 # Parse result and return
                 cursor.execute(sql)
                 connection.commit()
@@ -395,8 +424,7 @@ def export_similarities():
                 
         # If the similarities table is non-present we will end up here.
         except Exception as e:
-            print("Similarities table did not exist, so we will attempt to create it.")
-            create_similarities_table()
+            print("SQL Exception somewhere.")
             return
     
     print("Similarity export complete.")
@@ -452,9 +480,8 @@ if __name__ == '__main__':
     compute_distances()
 
     # To visualize results with plots:
-    plot_similar_materials(8000075)
-    plot_similar_materials_3d(8000075)
+    #plot_similar_materials(4060666)
+    #plot_similar_materials_3d(4060666)
 
     # To export the materials to the similarities table:
     export_similarities()
-    
