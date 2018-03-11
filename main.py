@@ -14,8 +14,7 @@ from matplotlib import colors as mcolors
 
 from config import *
 
-
-#
+# Set the number of interpolation points
 INTERPOLATION_POINTS = 1000
 
 def get_db_connection():
@@ -189,7 +188,6 @@ def compute_distances():
     # material_ids = [1008776, 1008775, 1008787]
     material_ids = [1008776, 1008775, 1008787, 4060666, 4021827, 8000075]
     
-
     # Compute all the distances
     similarities_dict = {}
     k = 0
@@ -347,85 +345,67 @@ def export_similarities():
         except Exception as e:
             #print("Probable KeyError on material " + str(material_id))
             continue
-        try:
-            with connection.cursor() as cursor:
+        with connection.cursor() as cursor:
 
-                exists = False
-                try:
-                    # Read a single record
-                    sql = (
-                        'SELECT EXISTS(select * from similarities where reference=' + str(material_id) + ') '
-                    )
-                    # Parse result and return
-                    cursor.execute(sql)
-                    results = cursor.fetchone()
-                    exists = True if (int(str(results)[-2:][:1]) == 1) else False
-                    print("Exists " + str(material_id) + ": " + str(exists))
-                except Exception as e:
-                    print("Similarities table did not exist, so we will attempt to create it.")
-                    create_similarities_table()
-                    return
+            row_exists = False
 
-                sql = ""
-                
-                # Read a single record
-                if (not exists):
-                    sql = (
-                        'INSERT INTO similarities '
-                        '(reference, euc_1, euc_2, euc_3, euc_4, euc_5, '
-                        'euc_6, euc_7, euc_8, euc_9, euc_10) '
-                        'VALUES (' + str(material_id) + ', ' + str(current_similarities[0][0]) + ', ' 
-                        + str(current_similarities[1][0]) + ', ' + str(current_similarities[2][0]) + ', ' 
-                        + str(current_similarities[3][0]) + ', ' + str(current_similarities[4][0]) + ', ' 
-                        + str(current_similarities[5][0]) + ', ' + str(current_similarities[6][0]) + ', ' 
-                        + str(current_similarities[7][0]) + ', ' + str(current_similarities[8][0]) + ', ' 
-                        + str(current_similarities[9][0]) + ') '
-                    )
-                else:
-                    sql = (
-                        'UPDATE similarities '
-                        'SET euc_1=' + str(current_similarities[0][0]) + ', euc_2=' + 
-                        str(current_similarities[1][0]) + ', euc_3=' + 
-                        str(current_similarities[2][0]) + ', euc_4=' + 
-                        str(current_similarities[3][0]) + ', euc_5=' + 
-                        str(current_similarities[4][0]) + ', euc_6=' + 
-                        str(current_similarities[5][0]) + ', euc_7=' + 
-                        str(current_similarities[6][0]) + ', euc_8=' + 
-                        str(current_similarities[7][0]) + ', euc_9=' + 
-                        str(current_similarities[8][0]) + ', euc_10=' + 
-                        str(current_similarities[9][0]) + ' '
-                        'WHERE reference=' + str(material_id) + ' '
-                    )
-
-                # Parse result and return
-                cursor.execute(sql)
-                connection.commit()
-                print(str(sql))
-            with connection.cursor() as cursor:
-                # Read a single record
+            # We will first determine if there 
+            # already is a row for the current material id.
+            try:
+                # Does there exist a row with material_id as reference?
                 sql = (
-                    'UPDATE similarities '
-                    'SET euc_1_val=' + str(current_similarities[0][1]) + ', euc_2_val=' + 
-                    str(current_similarities[1][1]) + ', euc_3_val=' + 
-                    str(current_similarities[2][1]) + ', euc_4_val=' + 
-                    str(current_similarities[3][1]) + ', euc_5_val=' + 
-                    str(current_similarities[4][1]) + ', euc_6_val=' + 
-                    str(current_similarities[5][1]) + ', euc_7_val=' + 
-                    str(current_similarities[6][1]) + ', euc_8_val=' + 
-                    str(current_similarities[7][1]) + ', euc_9_val=' + 
-                    str(current_similarities[8][1]) + ', euc_10_val=' + 
-                    str(current_similarities[9][1]) + ' '
-                    'WHERE reference=' + str(material_id) + ' '
+                    'SELECT EXISTS(select * from similarities where reference=' + str(material_id) + ') '
                 )
                 # Parse result and return
                 cursor.execute(sql)
-                connection.commit()
-                print(str(sql))
+                results = cursor.fetchone()
+                row_exists = True if (int(str(results)[-2:][:1]) == 1) else False
+            except Exception as e:
+                # If there was an exception thrown here, it is most likely
+                # due to that the similarities table is non-existing.
+                print("Similarities table did not exist, so we will attempt to create it.")
+                create_similarities_table()
+                return
+
+            sql = ""
+            
+            # We will now insert or update 
+            # depending on if there already is a row present.
+            if (not row_exists):
+                # Building the somewhat lengthy insert statement string
+                statement = "INSERT INTO similarities "
+                statement += "(reference, "
+                for i in range(0, 10):
+                    statement += "euc_" + str(i + 1) + ", "
+                for i in range(0, 9):
+                    statement += "euc_" + str(i + 1) + "_val, "
+                statement += "euc_10_val) VALUES("
+                statement += str(material_id) + ", "
+                for i in range(0, 10):
+                    statement += str(current_similarities[i][0]) + ", "
+                for i in range(0, 9):
+                    statement += str(current_similarities[i][1]) + ", "
+                statement += str(current_similarities[9][1]) + ")"
                 
-        # If the similarities table is non-present we will end up here.
-        except Exception as e:
-            print("SQL Exception somewhere.")
-            return
+                sql = (statement)
+            else:
+                # Building the somewhat lengthy update statement string
+                statement = "UPDATE similarities SET "
+                for i in range (0, 10):
+                    statement += "euc_" + str(i + 1) + "=" 
+                    statement += str(current_similarities[i][0]) + ", "
+                for i in range(0, 9):
+                    statement += "euc_" + str(i + 1) + "_val=" 
+                    statement += str(current_similarities[i][1]) + ", "
+                statement += "euc_10_val=" + str(current_similarities[9][1]) 
+                statement += " WHERE reference=" + str(material_id)
+                
+                sql = (statement)
+
+            # Parse result and return
+            cursor.execute(sql)
+            connection.commit()
+            print(str(sql))
     
     print("Similarity export complete.")
 
@@ -439,33 +419,17 @@ def create_similarities_table():
     # Set up database connection
     connection = get_db_connection()
 
+    # Build the SQL statement
+    statement = "CREATE TABLE similarities( \nreference int, \n"
+    for i in range (0, 10):
+        statement += "euc_" + str(i+1) + " int, \n"
+    for i in range (0, 9):
+        statement += "euc_" + str(i+1) + "_val double, \n"
+    statement += "euc_10_val double\n)"
+
     # Connect and create the table
     with connection.cursor() as cursor:
-        sql = (
-            'CREATE TABLE similarities ( '
-            'reference int, '
-            'euc_1 int, '
-            'euc_2 int, '
-            'euc_3 int, '
-            'euc_4 int, '
-            'euc_5 int, '
-            'euc_6 int, '
-            'euc_7 int, '
-            'euc_8 int, '
-            'euc_9 int, '
-            'euc_10 int, '
-            'euc_1_val double, ' 
-            'euc_2_val double, ' 
-            'euc_3_val double, ' 
-            'euc_4_val double, ' 
-            'euc_5_val double, ' 
-            'euc_6_val double, ' 
-            'euc_7_val double, ' 
-            'euc_8_val double, ' 
-            'euc_9_val double, ' 
-            'euc_10_val double ' 
-            ' )'
-        )
+        sql = (statement)
         cursor.execute(sql)
         connection.commit()
         print(str(sql))
@@ -474,14 +438,13 @@ def create_similarities_table():
     print("Successfully created similarities table.")
     export_similarities()
 
-
 if __name__ == '__main__':
     # To run the distance computation:
     compute_distances()
 
-    # To visualize results with plots:
-    #plot_similar_materials(4060666)
-    #plot_similar_materials_3d(4060666)
-
     # To export the materials to the similarities table:
     export_similarities()
+
+    # To visualize results with plots:
+    # plot_similar_materials(1008776)
+    # plot_similar_materials_3d(1008776)
