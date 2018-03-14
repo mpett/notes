@@ -186,7 +186,7 @@ def compute_distances():
 
     # Remove this line if you want to compute all possible distances
     # material_ids = [1008776, 1008775, 1008787]
-    material_ids = [1008776, 1008775, 1008787, 4060666, 4021827, 8000075]
+    # material_ids = [1008776, 1008775, 1008787, 4060666, 4021827, 8000075]
     
     # Compute all the distances
     similarities_dict = {}
@@ -440,11 +440,11 @@ def create_similarities_table():
 
 if __name__ == '__main__':
     # To run the distance computation:
-    compute_distances()
+    # compute_distances()
 
     # To export the materials to the similarities table:
-    export_similarities()
+    # export_similarities()
 
     # To visualize results with plots:
-    # plot_similar_materials(1008776)
-    # plot_similar_materials_3d(1008776)
+    plot_similar_materials(2105850)
+    plot_similar_materials_3d(2105850)
