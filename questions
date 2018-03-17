@@ -1,3 +1,23 @@
+17 March 2018
+---
+
+Met with Bart, Roberto, Charles.
+
+We put up the similarities table on staging.
+
+I'm going to do a similarity search with crystal structure eigenvectors.
+Roberto is going to give me the vectors.
+
+Clustering/graph visualization of current similarities is also on todo.
+
+Last time we worked on the updater script. For some reason we get
+the same "memory issue" or whatever when we try to run the similarities
+computation on the server. Everything appears to go slower and slower
+during interpolation (in a log-like manner). I had the exact same problem
+when developing the first Java version.
+
+---
+
 24 February 2018
 ---
 CREATE TABLE similarities (
