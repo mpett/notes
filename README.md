@@ -1,4 +1,4 @@
-# omdb notes
+# notes
 ![Donut Project](images/processed/im17.png)
 ![Donut Project](images/processed/im16.png)
 ![Donut Project](images/processed/im15.png)
